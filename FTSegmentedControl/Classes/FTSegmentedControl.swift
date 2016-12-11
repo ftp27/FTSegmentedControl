@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol FTSegmentedControlDataSource {
+public protocol FTSegmentedControlDataSource {
     
     func segmenredControlCount(segmenedControl: FTSegmentedControl) -> Int;
     func segmenredControlSegment(segmenedControl: FTSegmentedControl, segment: Int) -> UIButton;
@@ -16,7 +16,7 @@ protocol FTSegmentedControlDataSource {
     
 }
 
-protocol FTSegmentedControlDelegate {
+public protocol FTSegmentedControlDelegate {
     
     func segmenredControlDidSelect(segmenedControl: FTSegmentedControl, segment: Int) -> Bool;
     
