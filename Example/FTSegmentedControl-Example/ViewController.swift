@@ -17,7 +17,7 @@ class ViewController: UIViewController, FTSegmentedControlDelegate, FTSegmentedC
         super.viewDidLoad()
         segmentedControl.delegate = self
         segmentedControl.dataSource = self
-        segmentedControl.selectSegment(segment: 0)
+        segmentedControl.selectedSegment = 0
     }
 
     func segmenredControlCount(segmenedControl: FTSegmentedControl) -> Int {
@@ -34,7 +34,7 @@ class ViewController: UIViewController, FTSegmentedControlDelegate, FTSegmentedC
     
     func segmenredControlDidSelect(segmenedControl: FTSegmentedControl, segment: Int) -> Bool {
         label.text = "Item \(segment)"
-        return (segment != 3)
+        return (segment != 2)
     }
 
 }

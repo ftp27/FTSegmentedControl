@@ -42,15 +42,37 @@ class FTSegmentedControl: UIView {
     var cornerRadius: CGFloat = 5.0
     
     @IBInspectable
-    var selectedColor: UIColor = UIColor.red
+    var selectedColor: UIColor = UIColor.red {
+        didSet {
+            selectRect.backgroundColor = selectedColor.cgColor
+        }
+    }
+    
+    var borderLayer = CALayer()
+    var selectionLayer = CALayer()
+    var selectRect = CALayer()
     
     var contentView = UIView()
     
     var backgroundsCache: [Int: UIColor] = [:]
     
-    var seletedItem = 0 {
+    @IBInspectable
+    var selectedSegment: Int? {
         didSet {
-            
+            if let segment = selectedSegment {
+                for tag in 0..<segmentsCount() {
+                    if let bt = findButton(segment: tag) {
+                        if (bt.tag == segment+1) {
+                            bt.backgroundColor = UIColor.clear
+                        } else {
+                            if let bgColor = backgroundsCache[bt.tag] {
+                                bt.backgroundColor = bgColor
+                            }
+                        }
+                    }
+                }
+            }
+            drawSelection()
         }
     }
     
@@ -66,6 +88,9 @@ class FTSegmentedControl: UIView {
     
     func configureViews() {
         contentView.clipsToBounds = true
+        layer.addSublayer(borderLayer)
+        layer.addSublayer(selectionLayer)
+        selectionLayer.addSublayer(selectRect)
         addSubview(contentView)
         reloadData()
         
@@ -91,19 +116,32 @@ class FTSegmentedControl: UIView {
     override func draw(_ rect: CGRect) {
         drawBorderedBackground()
         drawItems()
+        drawSelection()
     }
     
     func drawBorderedBackground() {
-        layer.borderColor = borderColor.cgColor
         layer.cornerRadius = cornerRadius
-        layer.borderWidth = borderWidth
+        layer.borderWidth = 0
         layer.masksToBounds = true
+        
+        borderLayer.borderColor = borderColor.cgColor
+        borderLayer.cornerRadius = cornerRadius
+        borderLayer.borderWidth = borderWidth
+        
+        selectionLayer.cornerRadius = cornerRadius
+        selectionLayer.borderWidth = 0
+        selectionLayer.masksToBounds = true
+        selectRect.backgroundColor = selectedColor.cgColor
+        selectRect.borderWidth = 0
         
         contentView.layer.cornerRadius = cornerRadius-borderWidth
         contentView.layer.borderWidth = 0
         contentView.layer.masksToBounds = true
         
         let frame  = layer.bounds
+        selectionLayer.frame = frame
+        borderLayer.frame = frame
+        
         let width  = frame.width - borderWidth*2
         let height = frame.height - borderWidth*2
         contentView.frame = CGRect(x: borderWidth, y: borderWidth, width: width, height: height)
@@ -141,7 +179,6 @@ class FTSegmentedControl: UIView {
         
         segmentButton!.frame = segmentRect(segment: segment)
         segmentButton!.tag = segment+1
-        print(segmentButton!.tag)
         segmentButton!.addTarget(self, action: #selector(FTSegmentedControl.willSelectSegment(button:)) , for: .touchUpInside)
         backgroundsCache[segmentButton!.tag] = segmentButton?.backgroundColor
         
@@ -160,22 +197,35 @@ class FTSegmentedControl: UIView {
             return
         }
         if (delegate?.segmenredControlDidSelect(segmenedControl: self, segment: segment-1) ?? true) {
-            selectSegment(segment: segment-1)
+            selectedSegment = segment - 1
         }
     }
     
-    func selectSegment(segment: Int) {
-        for tag in 0..<segmentsCount() {
-            if let bt = findButton(segment: tag) {
-                if (bt.tag == segment+1) {
-                    bt.backgroundColor = selectedColor
-                } else {
-                    if let bgColor = backgroundsCache[bt.tag] {
-                        bt.backgroundColor = bgColor
-                    }
-                }
-            }
+    func drawSelection() {
+        guard let segment = selectedSegment else {
+            selectRect.backgroundColor = UIColor.clear.cgColor
+            return
         }
+        selectRect.backgroundColor = selectedColor.cgColor
+        
+        guard let button = findButton(segment: segment) else {
+            return
+        }
+        let frame = button.frame
+        let y = frame.origin.y
+        let height = layer.bounds.height
+        
+        var x = frame.origin.x
+        if (segment != 0) {
+            x += borderWidth
+        }
+        
+        var width = frame.width
+        if (segment == 0 || segment == segmentsCount()-1) {
+            width += borderWidth
+        }
+        
+        selectRect.frame = CGRect(x: x , y: y, width: width, height: height)
     }
  
 }
