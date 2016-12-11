@@ -36,6 +36,14 @@ class ViewController: UIViewController, FTSegmentedControlDelegate, FTSegmentedC
         label.text = "Item \(segment)"
         return (segment != 2)
     }
+    
+    func segmenredControlSegmentWidth(segmenedControl: FTSegmentedControl, segment: Int) -> Float? {
+        if (segment == 1) {
+            return 60
+        } else {
+            return nil
+        }
+    }
 
 }
 

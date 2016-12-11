@@ -12,6 +12,7 @@ protocol FTSegmentedControlDataSource {
     
     func segmenredControlCount(segmenedControl: FTSegmentedControl) -> Int;
     func segmenredControlSegment(segmenedControl: FTSegmentedControl, segment: Int) -> UIButton;
+    func segmenredControlSegmentWidth(segmenedControl: FTSegmentedControl, segment: Int) -> Float?;
     
 }
 
@@ -55,6 +56,7 @@ class FTSegmentedControl: UIView {
     var contentView = UIView()
     
     var backgroundsCache: [Int: UIColor] = [:]
+    var widthCache: [Int: Float] = [:]
     
     @IBInspectable
     var selectedSegment: Int? {
@@ -98,9 +100,16 @@ class FTSegmentedControl: UIView {
     
     func reloadData() {
         backgroundsCache = [:]
+        widthCache = [:]
         
         for view in contentView.subviews {
             view.removeFromSuperview()
+        }
+        
+        for segment in 0..<segmentsCount() {
+            if let width = dataSource?.segmenredControlSegmentWidth(segmenedControl: self, segment: segment) {
+                widthCache[segment] = width
+            }
         }
         
         for segment in 0..<segmentsCount() {
@@ -156,10 +165,27 @@ class FTSegmentedControl: UIView {
     }
     
     func segmentRect(segment: Int) -> CGRect {
-        let cellWidth  = contentView.layer.bounds.width / CGFloat(segmentsCount())
+        var recervedWidth:Float = 0
+        for (_,width) in widthCache {
+            recervedWidth += width
+        }
+        let flexableWidth = (Float(contentView.layer.bounds.width) - recervedWidth) / Float(segmentsCount() - widthCache.count)
+        let cellWidth  = CGFloat(widthCache[segment] ?? flexableWidth)
         let cellHeight = contentView.layer.bounds.height
+        
+        recervedWidth = 0
+        var recervedCount:Int = 0
+        for seg in 0..<segment {
+            if let width = widthCache[seg] {
+                recervedWidth += width
+                recervedCount += 1
+            }
+        }
+        
+        let x = recervedWidth + Float(segment - recervedCount) * flexableWidth
+        
             
-        return CGRect(x: CGFloat(segment)*cellWidth, y: 0, width: cellWidth, height: cellHeight)
+        return CGRect(x: CGFloat(x), y: 0, width: cellWidth, height: cellHeight)
     }
     
     func segmentsCount() -> Int {
