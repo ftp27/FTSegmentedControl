@@ -12,7 +12,6 @@ protocol FTSegmentedControlDataSource {
     
     func segmenredControlCount(segmenedControl: FTSegmentedControl) -> Int;
     func segmenredControlSegment(segmenedControl: FTSegmentedControl, segment: Int) -> UIButton;
-    func segmenredControlSelectedBackground(segmenedControl: FTSegmentedControl, segment: Int) -> UIColor;
     
 }
 
@@ -25,7 +24,12 @@ protocol FTSegmentedControlDelegate {
 @IBDesignable
 class FTSegmentedControl: UIView {
     
-    var dataSource: FTSegmentedControlDataSource?
+    var dataSource: FTSegmentedControlDataSource? {
+        didSet {
+            reloadData()
+        }
+    }
+    
     var delegate: FTSegmentedControlDelegate?
 
     @IBInspectable
@@ -38,98 +42,82 @@ class FTSegmentedControl: UIView {
     var cornerRadius: CGFloat = 5.0
     
     let testLabels:[String] = ["Item 1", "Item 2", "Item 3"]
-    var selectionLayer = CALayer()
+    var contentView = UIView()
+    
     var seletedItem = 0 {
         didSet {
             
         }
     }
     
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        configureViews()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        configureViews()
+    }
+    
+    func configureViews() {
+        contentView.clipsToBounds = true
+        addSubview(contentView)
+        reloadData()
+        
+    }
+    
+    func reloadData() {
+        for view in contentView.subviews {
+            view.removeFromSuperview()
+        }
+        
+        for segment in 0..<segmentsCount() {
+            contentView.addSubview(segmentButton(segment: segment))
+        }
+    }
+    
     override func draw(_ rect: CGRect) {
         drawBorderedBackground()
-        drawSelectionLayer()
         drawItems()
     }
     
     func drawBorderedBackground() {
-        let borderLayer = CALayer()
-        borderLayer.frame = self.layer.bounds
-        borderLayer.borderColor = borderColor.cgColor
-        borderLayer.cornerRadius = cornerRadius
-        borderLayer.borderWidth = borderWidth
-        borderLayer.masksToBounds = true;
-        borderLayer.name = "borderLayer"
+        layer.borderColor = borderColor.cgColor
+        layer.cornerRadius = cornerRadius
+        layer.borderWidth = borderWidth
+        layer.masksToBounds = true
         
-        for segment in 0..<segmentsCount() {
-            let bgButtonLayer = CALayer()
-            let rect:CGRect = segmentRect(segment: segment, border: borderWidth)
-            
-            bgButtonLayer.frame = rect
-            maskSegment(layer: bgButtonLayer, segment: segment)
-            bgButtonLayer.backgroundColor = UIColor.blue.withAlphaComponent(0.2*(CGFloat(segment)+1)).cgColor
-            borderLayer.addSublayer(bgButtonLayer)
-        }
+        contentView.layer.cornerRadius = cornerRadius-borderWidth
+        contentView.layer.borderWidth = 0
+        contentView.layer.masksToBounds = true
         
-        layer.addSublayer(borderLayer)
-    }
-    
-    func drawSelectionLayer() {
-        let selectionLayer = CALayer()
-        selectionLayer.frame = self.layer.bounds
-        selectionLayer.cornerRadius = cornerRadius
-        selectionLayer.borderWidth = 0.0
-        selectionLayer.masksToBounds = true;
-        selectionLayer.name = "selectionLayer"
-        
-        self.selectionLayer.frame = segmentRect(segment: seletedItem)
-        self.selectionLayer.backgroundColor = selectedColor(segment: seletedItem).cgColor
-        selectionLayer.addSublayer(self.selectionLayer)
+        let frame  = layer.bounds
+        let width  = frame.width - borderWidth*2
+        let height = frame.height - borderWidth*2
+        contentView.frame = CGRect(x: borderWidth, y: borderWidth, width: width, height: height)
     }
     
     func drawItems() {
         let itemsCount = testLabels.count
         
         for segment in 0..<itemsCount {
-            let button  = segmentButton(segment: segment)
-            button.setTitle(testLabels[segment], for: .normal)
-            maskSegment(layer: button.layer, segment: segment)
-            
-            self.addSubview(button)
-        }
-    }
-    
-    func maskSegment(layer: CALayer, segment: Int) {
-        // TODO: Combinate masks
-        let cornerRadius = self.cornerRadius-borderWidth
-        if segment == 0 {
-            let startMaskLayer = CAShapeLayer()
-            startMaskLayer.path = UIBezierPath(roundedRect:layer.bounds,
-                                               byRoundingCorners:[.topLeft, .bottomLeft],
-                                               cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)).cgPath
-            layer.mask = startMaskLayer
-        } else if segment == segmentsCount() - 1 {
-            let endMaskLayer = CAShapeLayer()
-            endMaskLayer.path = UIBezierPath(roundedRect:layer.bounds,
-                                             byRoundingCorners:[.topRight, .bottomRight],
-                                             cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)).cgPath
-            layer.mask = endMaskLayer
+            if let button = findButton(segment: segment) {
+                button.frame = segmentRect(segment: segment)
+            }
         }
     }
     
     func segmentRect(segment: Int) -> CGRect {
-        return segmentRect(segment: segment, border: 0)
-    }
-    
-    func segmentRect(segment: Int, border: CGFloat) -> CGRect {
         var itemsCount = dataSource?.segmenredControlCount(segmenedControl: self)
         if (itemsCount == nil) {
             itemsCount = testLabels.count
         }
         
-        let cellWidth  = (layer.bounds.width - border*2) / CGFloat(itemsCount!)
-        let cellHeight = layer.bounds.height - border*2
+        let cellWidth  = (contentView.layer.bounds.width) / CGFloat(itemsCount!)
+        let cellHeight = contentView.layer.bounds.height
             
-        return CGRect(x: CGFloat(segment)*cellWidth + border, y: border, width: cellWidth, height: cellHeight)
+        return CGRect(x: CGFloat(segment)*cellWidth, y: 0, width: cellWidth, height: cellHeight)
     }
     
     func segmentsCount() -> Int {
@@ -140,26 +128,27 @@ class FTSegmentedControl: UIView {
     }
     
     func segmentButton(segment: Int) -> UIButton {
-        if let segmentButton = dataSource?.segmenredControlSegment(segmenedControl: self, segment: segment) {
-            return segmentButton
+        var segmentButton: UIButton?
+        if let button = dataSource?.segmenredControlSegment(segmenedControl: self, segment: segment) {
+            segmentButton = button
+        } else {
+            segmentButton  = UIButton(type: .system)
+            segmentButton!.backgroundColor = borderColor.withAlphaComponent(0.3*(CGFloat(segment)+1))
+            segmentButton!.tintColor = UIColor.white
+            segmentButton?.setTitle("Item \(segment)" , for: .normal)
         }
         
-        let button  = UIButton(type: .system)
-        button.frame = segmentRect(segment: segment)
-        button.tintColor = UIColor.white
+        segmentButton!.frame = segmentRect(segment: segment)
+        segmentButton!.tag = segment+1
         
-        return button
+        return segmentButton!
     }
     
-    func selectedColor(segment: Int) -> UIColor {
-        if let color = dataSource?.segmenredControlSelectedBackground(segmenedControl: self, segment: segment) {
-            return color
+    func findButton(segment: Int) -> UIButton? {
+        if let button = contentView.viewWithTag(segment+1) as? UIButton {
+            return button
         }
-        return UIColor.red
-    }
-    
-    func segmentBackground() {
-        
+        return nil
     }
  
 }
