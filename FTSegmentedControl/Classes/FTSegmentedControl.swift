@@ -23,43 +23,34 @@ protocol FTSegmentedControlDelegate {
 }
 
 @IBDesignable
-class FTSegmentedControl: UIView {
+public class FTSegmentedControl: UIView {
     
-    var dataSource: FTSegmentedControlDataSource? {
+    public var dataSource: FTSegmentedControlDataSource? {
         didSet {
             reloadData()
         }
     }
     
-    var delegate: FTSegmentedControlDelegate?
+    public var delegate: FTSegmentedControlDelegate?
 
     @IBInspectable
-    var borderColor: UIColor = UIColor.blue
+    public var borderColor: UIColor = UIColor.blue
     
     @IBInspectable
-    var borderWidth: CGFloat = 2.0
+    public var borderWidth: CGFloat = 2.0
     
     @IBInspectable
-    var cornerRadius: CGFloat = 5.0
+    public var cornerRadius: CGFloat = 5.0
     
     @IBInspectable
-    var selectedColor: UIColor = UIColor.red {
+    public var selectedColor: UIColor = UIColor.red {
         didSet {
             selectRect.backgroundColor = selectedColor.cgColor
         }
     }
     
-    var borderLayer = CALayer()
-    var selectionLayer = CALayer()
-    var selectRect = CALayer()
-    
-    var contentView = UIView()
-    
-    var backgroundsCache: [Int: UIColor] = [:]
-    var widthCache: [Int: Float] = [:]
-    
     @IBInspectable
-    var selectedSegment: Int? {
+    public var selectedSegment: Int? {
         didSet {
             if let segment = selectedSegment {
                 for tag in 0..<segmentsCount() {
@@ -78,17 +69,26 @@ class FTSegmentedControl: UIView {
         }
     }
     
-    override init(frame: CGRect) {
+    private var borderLayer = CALayer()
+    private var selectionLayer = CALayer()
+    private var selectRect = CALayer()
+    private var contentView = UIView()
+    private var backgroundsCache: [Int: UIColor] = [:]
+    private var widthCache: [Int: Float] = [:]
+    
+    
+    
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         configureViews()
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         configureViews()
     }
     
-    func configureViews() {
+    private func configureViews() {
         contentView.clipsToBounds = true
         layer.addSublayer(borderLayer)
         layer.addSublayer(selectionLayer)
@@ -98,7 +98,7 @@ class FTSegmentedControl: UIView {
         
     }
     
-    func reloadData() {
+    public func reloadData() {
         backgroundsCache = [:]
         widthCache = [:]
         
@@ -117,18 +117,18 @@ class FTSegmentedControl: UIView {
         }
     }
     
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         draw(layer.bounds)
     }
     
-    override func draw(_ rect: CGRect) {
+    override public func draw(_ rect: CGRect) {
         drawBorderedBackground()
         drawItems()
         drawSelection()
     }
     
-    func drawBorderedBackground() {
+    private func drawBorderedBackground() {
         layer.cornerRadius = cornerRadius
         layer.borderWidth = 0
         layer.masksToBounds = true
@@ -156,7 +156,7 @@ class FTSegmentedControl: UIView {
         contentView.frame = CGRect(x: borderWidth, y: borderWidth, width: width, height: height)
     }
     
-    func drawItems() {
+    private func drawItems() {
         for segment in 0..<segmentsCount() {
             if let button = findButton(segment: segment) {
                 button.frame = segmentRect(segment: segment)
@@ -164,7 +164,7 @@ class FTSegmentedControl: UIView {
         }
     }
     
-    func segmentRect(segment: Int) -> CGRect {
+    private func segmentRect(segment: Int) -> CGRect {
         var recervedWidth:Float = 0
         for (_,width) in widthCache {
             recervedWidth += width
@@ -188,11 +188,11 @@ class FTSegmentedControl: UIView {
         return CGRect(x: CGFloat(x), y: 0, width: cellWidth, height: cellHeight)
     }
     
-    func segmentsCount() -> Int {
+    private func segmentsCount() -> Int {
         return dataSource?.segmenredControlCount(segmenedControl: self) ?? 3
     }
     
-    func segmentButton(segment: Int) -> UIButton {
+    private func segmentButton(segment: Int) -> UIButton {
         var segmentButton: UIButton?
         if let button = dataSource?.segmenredControlSegment(segmenedControl: self, segment: segment) {
             segmentButton = button
@@ -211,14 +211,14 @@ class FTSegmentedControl: UIView {
         return segmentButton!
     }
     
-    func findButton(segment: Int) -> UIButton? {
+    private func findButton(segment: Int) -> UIButton? {
         if let button = contentView.viewWithTag(segment+1) as? UIButton {
             return button
         }
         return nil
     }
     
-    func willSelectSegment(button: UIButton?) {
+    @objc private func willSelectSegment(button: UIButton?) {
         guard let segment = button?.tag else {
             return
         }
@@ -227,7 +227,7 @@ class FTSegmentedControl: UIView {
         }
     }
     
-    func drawSelection() {
+    private func drawSelection() {
         guard let segment = selectedSegment else {
             selectRect.backgroundColor = UIColor.clear.cgColor
             return
