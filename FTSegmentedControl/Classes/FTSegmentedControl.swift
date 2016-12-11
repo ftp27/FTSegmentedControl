@@ -41,8 +41,12 @@ class FTSegmentedControl: UIView {
     @IBInspectable
     var cornerRadius: CGFloat = 5.0
     
-    let testLabels:[String] = ["Item 1", "Item 2", "Item 3"]
+    @IBInspectable
+    var selectedColor: UIColor = UIColor.red
+    
     var contentView = UIView()
+    
+    var backgroundsCache: [Int: UIColor] = [:]
     
     var seletedItem = 0 {
         didSet {
@@ -68,6 +72,8 @@ class FTSegmentedControl: UIView {
     }
     
     func reloadData() {
+        backgroundsCache = [:]
+        
         for view in contentView.subviews {
             view.removeFromSuperview()
         }
@@ -75,6 +81,11 @@ class FTSegmentedControl: UIView {
         for segment in 0..<segmentsCount() {
             contentView.addSubview(segmentButton(segment: segment))
         }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        draw(layer.bounds)
     }
     
     override func draw(_ rect: CGRect) {
@@ -99,9 +110,7 @@ class FTSegmentedControl: UIView {
     }
     
     func drawItems() {
-        let itemsCount = testLabels.count
-        
-        for segment in 0..<itemsCount {
+        for segment in 0..<segmentsCount() {
             if let button = findButton(segment: segment) {
                 button.frame = segmentRect(segment: segment)
             }
@@ -109,22 +118,14 @@ class FTSegmentedControl: UIView {
     }
     
     func segmentRect(segment: Int) -> CGRect {
-        var itemsCount = dataSource?.segmenredControlCount(segmenedControl: self)
-        if (itemsCount == nil) {
-            itemsCount = testLabels.count
-        }
-        
-        let cellWidth  = (contentView.layer.bounds.width) / CGFloat(itemsCount!)
+        let cellWidth  = contentView.layer.bounds.width / CGFloat(segmentsCount())
         let cellHeight = contentView.layer.bounds.height
             
         return CGRect(x: CGFloat(segment)*cellWidth, y: 0, width: cellWidth, height: cellHeight)
     }
     
     func segmentsCount() -> Int {
-        if let itemsCount = dataSource?.segmenredControlCount(segmenedControl: self) {
-            return itemsCount
-        }
-        return testLabels.count
+        return dataSource?.segmenredControlCount(segmenedControl: self) ?? 3
     }
     
     func segmentButton(segment: Int) -> UIButton {
@@ -135,11 +136,14 @@ class FTSegmentedControl: UIView {
             segmentButton  = UIButton(type: .system)
             segmentButton!.backgroundColor = borderColor.withAlphaComponent(0.3*(CGFloat(segment)+1))
             segmentButton!.tintColor = UIColor.white
-            segmentButton?.setTitle("Item \(segment)" , for: .normal)
+            segmentButton!.setTitle("Item \(segment)" , for: .normal)
         }
         
         segmentButton!.frame = segmentRect(segment: segment)
         segmentButton!.tag = segment+1
+        print(segmentButton!.tag)
+        segmentButton!.addTarget(self, action: #selector(FTSegmentedControl.willSelectSegment(button:)) , for: .touchUpInside)
+        backgroundsCache[segmentButton!.tag] = segmentButton?.backgroundColor
         
         return segmentButton!
     }
@@ -149,6 +153,29 @@ class FTSegmentedControl: UIView {
             return button
         }
         return nil
+    }
+    
+    func willSelectSegment(button: UIButton?) {
+        guard let segment = button?.tag else {
+            return
+        }
+        if (delegate?.segmenredControlDidSelect(segmenedControl: self, segment: segment-1) ?? true) {
+            selectSegment(segment: segment-1)
+        }
+    }
+    
+    func selectSegment(segment: Int) {
+        for tag in 0..<segmentsCount() {
+            if let bt = findButton(segment: tag) {
+                if (bt.tag == segment+1) {
+                    bt.backgroundColor = selectedColor
+                } else {
+                    if let bgColor = backgroundsCache[bt.tag] {
+                        bt.backgroundColor = bgColor
+                    }
+                }
+            }
+        }
     }
  
 }

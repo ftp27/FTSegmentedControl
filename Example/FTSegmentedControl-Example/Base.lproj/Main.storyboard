@@ -35,14 +35,8 @@
                                     <constraint firstAttribute="height" constant="52" id="qBf-a5-8qM"/>
                                 </constraints>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="borderRadius">
-                                        <real key="value" value="4"/>
-                                    </userDefinedRuntimeAttribute>
                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                         <real key="value" value="19"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="color" keyPath="fontColor">
-                                        <color key="value" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </userDefinedRuntimeAttribute>
                                     <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
                                         <color key="value" red="0.0" green="0.47843137250000001" blue="1" alpha="0.49333147321428572" colorSpace="custom" customColorSpace="sRGB"/>
@@ -64,6 +58,10 @@
                             <constraint firstItem="DJ1-VQ-9z2" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="xMh-C1-UuA"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="label" destination="DJ1-VQ-9z2" id="HiM-KM-ocV"/>
+                        <outlet property="segmentedControl" destination="CAL-ju-UQo" id="qQq-ix-bmT"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
