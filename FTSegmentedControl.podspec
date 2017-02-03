@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'FTSegmentedControl'
-  s.version          = '0.1'
+  s.version          = '0.1.1'
   s.summary          = 'Customizable Segmented control'
 
   s.description      = <<-DESC
@@ -13,7 +13,7 @@ Flexible and customizable Segmented control view
   s.source           = { :git => 'https://github.com/ftp27/FTSegmentedControl.git', :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/ftp27host'
 
-  s.ios.deployment_target = '7.0'
+  s.ios.deployment_target = '8.0'
 
   s.source_files = 'FTSegmentedControl/Classes/**/*'
 end
