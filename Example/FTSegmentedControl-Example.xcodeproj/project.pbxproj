@@ -116,7 +116,6 @@
 				TargetAttributes = {
 					9450652E1DFC1BE70057DFFF = {
 						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = Q4EKNPD4W8;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -282,7 +281,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = Q4EKNPD4W8;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "FTSegmentedControl-Example/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "ru.ftp27.FTSegmentedControl-Example";
@@ -295,7 +294,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = Q4EKNPD4W8;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "FTSegmentedControl-Example/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "ru.ftp27.FTSegmentedControl-Example";

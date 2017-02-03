@@ -28,7 +28,7 @@ class ViewController: UIViewController, FTSegmentedControlDelegate, FTSegmentedC
         let button = UIButton(type: .system)
         button.setTitle("Tab \(segment)", for: .normal)
         button.tintColor = UIColor.white
-        button.backgroundColor = UIColor.green.withAlphaComponent(0.25*(CGFloat(segment)+1))
+        button.backgroundColor = UIColor.blue.withAlphaComponent(0.25*(CGFloat(segment)+1))
         return button
     }
     
